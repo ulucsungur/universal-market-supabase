@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { ArrowRight, ImageOff } from 'lucide-react';
 import { useTranslations, useLocale } from 'next-intl';
 import { useCurrency } from '@/providers/Currency';
+import { supabase } from '@/lib/supabase'; // 1. EKSİK OLAN IMPORT BURADA
 
 export const PickedForYou = () => {
   const t = useTranslations('HomePage');
@@ -14,22 +15,33 @@ export const PickedForYou = () => {
   const [loading, setLoading] = useState(true);
   const { convert } = useCurrency();
 
-  // useEffect(() => {
-  //   // depth=1 ekleyerek resim objesinin (url dahil) gelmesini garanti ediyoruz
-  //   fetch(`/api/listings?locale=${locale}&limit=5&sort=-createdAt&depth=1`)
-  //     .then((res) => res.json())
-  //     .then((data) => {
-  //       setListings(data.docs || [])
-  //       setLoading(false)
-  //     })
-  //     .catch((err) => {
-  //       console.error('İlanlar çekilirken hata:', err)
-  //       setLoading(false)
-  //     })
-  // }, [locale])
+  useEffect(() => {
+    const fetchListings = async () => {
+      // Supabase'den verileri çekiyoruz
+      const { data, error } = await supabase
+        .from('listings')
+        .select(
+          `
+          *,
+          categories (title)
+        `,
+        )
+        .limit(10); // 5'li grid olduğu için 10 tane çekmek mantıklı (2 sıra)
+
+      if (error) {
+        console.error('İlanlar çekilirken hata oluştu:', error.message);
+      } else {
+        setListings(data || []);
+      }
+      setLoading(false);
+    };
+
+    fetchListings();
+  }, []);
 
   return (
     <section className="max-w-[1400px] mx-auto px-6 py-24">
+      {/* Başlık Alanı - Senin Tasarımın */}
       <div className="flex flex-col md:flex-row items-start md:items-end justify-between border-b border-slate-200 dark:border-white/10 pb-8 mb-12 gap-4">
         <div className="space-y-2">
           <span className="text-purple-600 font-black text-[10px] tracking-[0.4em] uppercase">
@@ -40,38 +52,42 @@ export const PickedForYou = () => {
           </h2>
         </div>
         <Link
-          href="/vehicle"
+          href="/listings"
           className="text-[10px] font-black uppercase tracking-widest text-blue-600 hover:text-blue-700 flex items-center gap-2"
         >
           {t('seeAll')} <ArrowRight size={14} />
         </Link>
       </div>
 
+      {/* İlan Grid Alanı */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-6">
         {loading
-          ? [1, 2, 3, 4, 5].map((i) => (
+          ? // Yükleme Durumu (Skeleton)
+            [1, 2, 3, 4, 5].map((i) => (
               <div
                 key={i}
                 className="aspect-[4/5] bg-slate-100 dark:bg-slate-900 animate-pulse border border-slate-200 dark:border-white/5"
               />
             ))
-          : listings.map((item) => {
-              // Resim URL kontrolü
-              const imageUrl = item.mainImage?.url;
+          : // Veri Geldiğinde Listeleme
+            listings.map((item) => {
+              // Supabase'de sütun adını 'image_url' yapmıştık
+              const imageUrl = item.image_url;
 
               return (
                 <Link
                   key={item.id}
-                  href={`/listing/${item.id}`}
+                  href={`/listings/${item.id}`} // Detay sayfası yolu
                   className="group flex flex-col bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/5 p-4 hover:shadow-xl transition-all duration-500"
                 >
+                  {/* Resim Alanı */}
                   <div className="relative aspect-square overflow-hidden bg-slate-50 dark:bg-slate-800 mb-4">
                     {imageUrl ? (
                       <Image
                         src={imageUrl}
                         alt={item.title || 'İlan'}
                         fill
-                        unoptimized
+                        unoptimized // Dış bağlantı (Unsplash vb.) kullandığımız için
                         sizes="(max-width: 768px) 100vw, 20vw"
                         className="object-cover group-hover:scale-110 transition-transform duration-700"
                       />
@@ -84,10 +100,18 @@ export const PickedForYou = () => {
                       </div>
                     )}
                   </div>
+
+                  {/* Bilgi Alanı */}
                   <div className="space-y-2">
-                    <h4 className="text-[11px] font-black uppercase truncate text-slate-800 dark:text-slate-200 tracking-tight">
-                      {item.title}
-                    </h4>
+                    <div className="flex justify-between items-start">
+                      <h4 className="text-[11px] font-black uppercase truncate text-slate-800 dark:text-slate-200 tracking-tight flex-1">
+                        {item.title}
+                      </h4>
+                    </div>
+                    {/* Kategori Adı (Supabase ilişkisinden geliyor) */}
+                    <p className="text-[9px] text-slate-400 uppercase font-bold tracking-widest">
+                      {item.categories?.title}
+                    </p>
                     <p className="text-purple-600 dark:text-purple-400 font-black text-sm">
                       {convert(item.price, item.currency || 'TRY')}
                     </p>

@@ -211,6 +211,14 @@
     "error": "An error occurred during update.",
     "roleLabel": "ACCOUNT TYPE"
   },
+  "ListingDetail": {
+    "addDescription": "Add Description",
+    "price": "Price",
+    "addDate": "Add Date",
+    "addOwner": "Add Owner",
+    "StoreIndividual": "Store / Individual",
+    "contactToSeller": "CONTACT TO SELLER"
+  },
   "Cart": {
     "addToCart": "Add to Cart",
     "buyNow": "Buy Now",

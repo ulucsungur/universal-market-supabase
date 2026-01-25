@@ -14,7 +14,7 @@
     "messages": "Mesajlarım"
   },
   "Navbar": {
-    "vehicles": "Vasıtalar",
+    "vehicles": "Vasıta",
     "properties": "Emlak",
     "services": "Hizmetler",
     "searchPlaceholder": "İlan başlığı, marka veya kategori ara...",
@@ -210,6 +210,14 @@
     "success": "Profiliniz başarıyla güncellendi!",
     "error": "Güncelleme sırasında bir hata oluştu.",
     "roleLabel": "HESAP TÜRÜ"
+  },
+  "ListingDetail": {
+    "addDescription": "İlan Açıklaması",
+    "price": "Fiyat",
+    "addDate": "İlan Tarihi",
+    "addOwner": "İlan Sahibi",
+    "StoreIndividual": "Mağaza / Bireysel",
+    "contactToSeller": "İLETİŞİME GEÇ"
   },
   "Cart": {
     "addToCart": "Sepete Ekle",
